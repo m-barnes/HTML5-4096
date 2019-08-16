@@ -65,7 +65,8 @@ class playGame extends Phaser.Scene{
                 tile.visible = false;
                 this.boardArray[i][j] = {
                     tileValue: 0,
-                    tileSprite: tile
+                    tileSprite: tile,
+                    upgraded: false
                 }
             }
         }
@@ -196,6 +197,7 @@ class playGame extends Phaser.Scene{
 
                       this.boardArray[curRow][curCol].tileValue = 0;                if(this.boardArray[newRow][newCol].tileValue == tileValue) {
                       this.boardArray[newRow][newCol].tileValue ++;
+                      this.boardArray[newRow][newCol].upgraded = true;
                       this.boardArray[curRow][curCol].tileSprite.setFrame(tileValue);
                       }
 
@@ -222,7 +224,8 @@ class playGame extends Phaser.Scene{
       }
       var emptySpot = this.boardArray[row][col].tileValue == 0;
       var sameValue = this.boardArray[row][col].tileValue == value;
-      return emptySpot || sameValue;
+      var alreadyUpgraded = this.boardArray[row][col].upgraded;
+      return emptySpot || (sameValue && !alreadyUpgraded);
     }
 
     refreshBoard(){
@@ -232,6 +235,7 @@ class playGame extends Phaser.Scene{
           var tileValue = this.boardArray[i][j].tileValue;
           if(tileValue > 0) {
             this.boardArray[i][j].tileSprite.visible = true;                this.boardArray[i][j].tileSprite.setFrame(tileValue - 1);
+            this.boardArray[i][j].upgraded = false;
           }
           else {
             this.boardArray[i][j].tileSprite.visible = false;            }
