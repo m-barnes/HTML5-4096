@@ -1,211 +1,258 @@
 var game;
-// gameOption variable holds all the specific game data variables such as tilesize and boardsize
+//Game Options centralized in one section
 var gameOptions = {
-  tileSize: 200,
-  tileSpacing:20,
-  boardSize: {
-    rows: 4,
-    cols: 4
-  },
-  tweenSpeed: 150,
-  //touch movement variables
-  swipeMaxTime: 1000,
-  swipeMinDistance: 20,
-  swipeMinNormal: 0.85
+    tileSize: 200,
+    tileSpacing: 20,
+    boardSize: {
+        rows: 4,
+        cols: 4
+    },
+    tweenSpeed: 200,
+    swipeMaxTime: 1000,
+    swipeMinDistance: 20,
+    swipeMinNormal: 0.85
 }
-
-//constants for direction
+//constants assigning number values to directions
 const LEFT = 0;
 const RIGHT = 1;
 const UP = 2;
 const DOWN = 3;
 
-//create the window for the game to run in. Create the gameboard and set scenes.
+//load the window, load the canvas (width, height, and background color), and start scenes
 window.onload = function() {
-  var gameConfig = {
-    width: gameOptions.boardSize.cols * (gameOptions.tileSize + gameOptions.tileSpacing) + gameOptions.tileSpacing,
-    height: gameOptions.boardSize.rows * (gameOptions.tileSize + gameOptions.tileSpacing) + gameOptions.tileSpacing,
-    backgroundColor: 0xecf0f1,
-    scene:[bootGame,playGame]
-  }
-    //create a new game object using the phaser framework. Refocus the window and automatically run the resizeGame function
+    var gameConfig = {
+        width: gameOptions.boardSize.cols * (gameOptions.tileSize + gameOptions.tileSpacing) + gameOptions.tileSpacing,
+        height: gameOptions.boardSize.rows * (gameOptions.tileSize + gameOptions.tileSpacing) + gameOptions.tileSpacing,
+        backgroundColor: 0xecf0f1,
+        scene: [bootGame, playGame]
+    }
     game = new Phaser.Game(gameConfig);
     window.focus();
     resizeGame();
     window.addEventListener("resize", resizeGame);
 }
 
-//The resizeGame function resizes the game to best fit the window avaialable.
-function resizeGame() {
-  var canvas = document.querySelector("canvas");
-  var windowWidth = window.innerWidth;
-  var windowHeight = window.innerHeight;
-  var windowRatio = windowWidth / windowHeight;
-  var gameRatio = game.config.width / game.config.height;
-    if(windowRatio < gameRatio){
-      canvas.style.width = windowWidth + "px";
-      canvas.style.height = (windowWidth / gameRatio) + "px";
+//start the 'bootgame' scene. Preload the images and move to the playgame scene
+class bootGame extends Phaser.Scene{
+    constructor(){
+        super("BootGame");
     }
-    else{
-      canvas.style.width = (windowHeight * gameRatio) + "px";
-      canvas.style.height = windowHeight + "px";
+    preload(){
+        this.load.image("emptytile", "assets/sprites/emptytile.png");
+        this.load.spritesheet("tiles", "assets/sprites/tiles.png", {
+            frameWidth: gameOptions.tileSize,
+            frameHeight: gameOptions.tileSize
+        });
+    }
+    create(){
+        this.scene.start("PlayGame");
     }
 }
-
-//preload  images and other assets for the game.
-class bootGame extends Phaser.Scene {
-  constructor() {
-  super("BootGame");
-  }
-  preload() {
-    this.load.image("emptytile", "assets/sprites/emptytile.png");
-    this.load.spritesheet("tiles", "assets/sprites/tiles.png",{
-      frameWidth: gameOptions.tileSize,
-      frameHeight: gameOptions.tileSize
-      });
-  }
-  create() {
-    this.scene.start("PlayGame");
-  }
-}
-
-//Our main function and gameloop stuff.
-class playGame extends Phaser.Scene {
-  constructor() {
-    super("PlayGame");
-  }
-  create() {
-    this.canMove = false;
-    //initialize an empty array
-    this.boardArray = [];
-    //create the grid using a nested for loop.
-    for(var i = 0; i < gameOptions.boardSize.rows; i++) {
-      this.boardArray[i] = [];
-      for(var j = 0; j < gameOptions.boardSize.cols; j++) {
-            var tilePosition = this.getTilePosition(i, j);
-            //set 'emptytile as the background board image'
-            this.add.image(tilePosition.x, tilePosition.y, "emptytile");
-            //load the tiles spritesheet
-            var tile = this.add.sprite(tilePosition.x, tilePosition.y, "tiles", 0);
-            //set visibility to false
-            tile.visible = false;
-            //store the board/tile coordinates into our array
-            this.boardArray[i][j] = {
-              tileValue:0,
-              tileSprite: tile
+//start playgame scene. Create the board, load all the tiles and hide them.
+class playGame extends Phaser.Scene{
+    constructor(){
+        super("PlayGame");
+    }
+    create(){
+        this.canMove = false;
+        this.boardArray = [];
+        for(var i = 0; i < gameOptions.boardSize.rows; i++){
+            this.boardArray[i] = [];
+            for(var j = 0; j < gameOptions.boardSize.cols; j++){
+                var tilePosition = this.getTilePosition(i, j);
+                this.add.image(tilePosition.x, tilePosition.y, "emptytile");
+                var tile = this.add.sprite(tilePosition.x, tilePosition.y, "tiles", 0);
+                tile.visible = false;
+                this.boardArray[i][j] = {
+                    tileValue: 0,
+                    tileSprite: tile
+                }
             }
         }
-      }
-      //add a couple of random tiles to the board
-      this.addTile();
-      this.addTile();
-
-      //check for input on the keyboard or with a swipe
-      this.input.keyboard.on("keydown", this.handleKey, this);
-      this.input.on("pointerup", this.handleSwipe, this);
+        //add two random tiles to the baord.
+        this.addTile();
+        this.addTile();
+        //check for input from both the keyboard and gestures
+        this.input.keyboard.on("keydown", this.handleKey, this);
+        this.input.on("pointerup", this.handleSwipe, this);
     }
-
-      //get tile position, do some math, return it as a phaser object
-      getTilePosition(row, col) {
+    //collect the coordinates for empty tiles on the board.
+    addTile(){
+        var emptyTiles = [];
+        for(var i = 0; i < gameOptions.boardSize.rows; i++){
+            for(var j = 0; j < gameOptions.boardSize.cols; j++){
+                if(this.boardArray[i][j].tileValue == 0){
+                    emptyTiles.push({
+                        row: i,
+                        col: j
+                    })
+                }
+            }
+        }
+        //find a random tile from the emptyTiles array and change the opacity of the element from 0 to 1 to make it 'appear' on the board.
+        if(emptyTiles.length > 0){
+            var chosenTile = Phaser.Utils.Array.GetRandom(emptyTiles);
+            this.boardArray[chosenTile.row][chosenTile.col].tileValue = 1;
+            this.boardArray[chosenTile.row][chosenTile.col].tileSprite.visible = true;
+            this.boardArray[chosenTile.row][chosenTile.col].tileSprite.setFrame(0);
+            this.boardArray[chosenTile.row][chosenTile.col].tileSprite.alpha = 0;
+            this.tweens.add({
+                targets: [this.boardArray[chosenTile.row][chosenTile.col].tileSprite],
+                alpha: 1,
+                duration: gameOptions.tweenSpeed,
+                callbackScope: this,
+                onComplete: function(){
+                    this.canMove = true;
+                }
+            });
+        }
+    }
+    //find a tile position and return it as a Phasier 'point' object.
+    getTilePosition(row, col){
         var posX = gameOptions.tileSpacing * (col + 1) + gameOptions.tileSize * (col + 0.5);
         var posY = gameOptions.tileSpacing * (row + 1) + gameOptions.tileSize * (row + 0.5);
         return new Phaser.Geom.Point(posX, posY);
-      }
-
-      //handle keyboard input
-      handleKey(e) {
-        if(this.canMove) {
-          switch(e.code) {
-            case "KeyA":
-            case "ArrowLeft":
-                this.makeMove(LEFT);
-                break;
-            case "KeyD":
-            case "ArrowRight":
-                this.makeMove(RIGHT);
-                break;
-            case "keyW":
-            case "ArrowUp":
-                this.makeMove(UP);
-                break;
-            case "KeyS":
-            case "ArrowDown":
-                this.makeMove(DOWN);
-                break
-          }
-        }
-      }
-
-      //handle swipe events
-      handleSwipe(e){
+    }
+    //callback function to handle keyboard input.
+    handleKey(e){
         if(this.canMove){
-                  //swipeTime is the time(in ms) for the total touch event from when the finger goes down to when it comes up.
-                  var swipeTime = e.upTime - e.downTime;
-                  var fastEnough = swipeTime < gameOptions.swipeMaxTime;
-                  var swipe = new Phaser.Geom.Point(e.upX - e.downX, e.upY - e.downY);
-                  var swipeMagnitude = Phaser.Geom.Point.GetMagnitude(swipe);
-                  var longEnough = swipeMagnitude > gameOptions.swipeMinDistance;
-                  if(longEnough && fastEnough){
-                    Phaser.Geom.Point.SetMagnitude(swipe, 1);
-                      if(swipe.x > gameOptions.swipeMinNormal){
-                        this.makeMove(RIGHT);
-                      }
-                      if(swipe.x < -gameOptions.swipeMinNormal){
-                        this.makeMove(LEFT);
-                      }
-                      if(swipe.y > gameOptions.swipeMinNormal){
-                        this.makeMove(DOWN);
-                      }
-                      if(swipe.y < -gameOptions.swipeMinNormal){
-                        this.makeMove(UP);
-                      }
-                    }
-                  }
-                }
+            switch(e.code){
+                case "KeyA":
+                case "ArrowLeft":
+                    this.makeMove(LEFT);
+                    break;
+                case "KeyD":
+                case "ArrowRight":
+                    this.makeMove(RIGHT);
+                    break;
+                case "KeyW":
+                case "ArrowUp":
+                    this.makeMove(UP);
+                    break;
+                case "KeyS":
+                case "ArrowDown":
+                    this.makeMove(DOWN);
+                    break;
+            }
+        }
+    }
 
-      //make a tile move
-      makeMove(d){
+    //callback function to handle swipe gestures.
+    handleSwipe(e){
+        if(this.canMove){
+            var swipeTime = e.upTime - e.downTime;
+            var fastEnough = swipeTime < gameOptions.swipeMaxTime;
+            var swipe = new Phaser.Geom.Point(e.upX - e.downX, e.upY - e.downY);
+            var swipeMagnitude = Phaser.Geom.Point.GetMagnitude(swipe);
+            var longEnough = swipeMagnitude > gameOptions.swipeMinDistance;
+            if(longEnough && fastEnough){
+                Phaser.Geom.Point.SetMagnitude(swipe, 1);
+                if(swipe.x > gameOptions.swipeMinNormal){
+                    this.makeMove(RIGHT);
+                }
+                if(swipe.x < -gameOptions.swipeMinNormal){
+                    this.makeMove(LEFT);
+                }
+                if(swipe.y > gameOptions.swipeMinNormal){
+                    this.makeMove(DOWN);
+                }
+                if(swipe.y < -gameOptions.swipeMinNormal){
+                    this.makeMove(UP);
+                }
+            }
+        }
+    }
+    //move the element according to direction selected.
+    makeMove(d){
         var dRow = (d == LEFT || d == RIGHT) ? 0 : d == UP ? -1 : 1;
         var dCol = (d == UP || d == DOWN) ? 0 : d == LEFT ? -1 : 1;
         this.canMove = false;
-        for(var i = 0; i < gameOptions.boardSize.rows; i++){
-          for(var j = 0; j < gameOptions.boardSize.cols; j++){
-            var curRow = dRow == 1 ? (gameOptions.boardSize.rows - 1) - i : i;
-            var curCol = dCol == 1 ? (gameOptions.boardSize.cols - 1) - j : j;
-            var tileValue = this.boardArray[curRow][curCol].tileValue;            if(tileValue != 0){
-              
+        var movedTiles = 0;
+        var firstRow = (d == UP) ? 1 : 0;
+        var lastRow = gameOptions.boardSize.rows - ((d == DOWN) ? 1 : 0);
+        var firstCol = (d == LEFT) ? 1 : 0;
+        var lastCol = gameOptions.boardSize.cols - ((d == RIGHT) ? 1 : 0);
+        var movedSomething = false;
+        for(var i = firstRow; i < lastRow; i++){
+            for(var j = firstCol; j < lastCol; j++){
+                var curRow = dRow == 1 ? (lastRow - 1) - i : i;
+                var curCol = dCol == 1 ? (lastCol - 1) - j : j;
+                var tileValue = this.boardArray[curRow][curCol].tileValue;
+                if(tileValue != 0){
+                    var newRow = curRow;
+                    var newCol = curCol;
+                    while(this.isLegalPosition(newRow + dRow, newCol + dCol, tileValue)){
+                        newRow += dRow;
+                        newCol += dCol;
+                    }
+                    movedTiles ++;
+                    if(newRow != curRow || newCol != curCol){
+                      movedSomething = true;
 
-              var newPos = this.getTilePosition(curRow + dRow, curCol + dCol);
-               this.boardArray[curRow][curCol].tileSprite.x = newPos.x;                this.boardArray[curRow][curCol].tileSprite.y = newPos.y;            }
-             }
-           }
-         }
-      // addTiles function. Pretty self explanatory
-      addTile() {
-            var emptyTiles = [];
-            for(var i = 0; i < gameOptions.boardSize.rows; i++){
-              for(var j = 0; j < gameOptions.boardSize.cols; j++){
-                if(this.boardArray[i][j].tileValue == 0){
-                  emptyTiles.push({
-                    row: i,
-                    col: j
-                  })
+                      this.boardArray[curRow][curCol].tileSprite.depth = movedTiles;
+                      var newPos = this.getTilePosition(newRow, newCol);
+                      this.boardArray[curRow][curCol].tileSprite.x = newPos.x;
+                      this.boardArray[curRow][curCol].tileSprite.y = newPos.y;
+
+                      this.boardArray[curRow][curCol].tileValue = 0;                if(this.boardArray[newRow][newCol].tileValue == tileValue) {
+                      this.boardArray[newRow][newCol].tileValue ++;
+                      this.boardArray[curRow][curCol].tileSprite.setFrame(tileValue);
+                      }
+
+                      else {
+                        this.boardArray[newRow][newCol].tileValue = tileValue;
+                      }
+                    }
                 }
-              }
             }
-         if(emptyTiles.length > 0) {
-           var chosenTile = Phaser.Utils.Array.GetRandom(emptyTiles);        this.boardArray[chosenTile.row][chosenTile.col].tileValue = 1;        this.boardArray[chosenTile.row][chosenTile.col].tileSprite.visible = true;        this.boardArray[chosenTile.row][chosenTile.col].tileSprite.setFrame(0);
-           this.boardArray[chosenTile.row][chosenTile.col].tileSprite.alpha = 0;
-           this.tweens.add({
-             targets: [this.boardArray[chosenTile.row][chosenTile.col].tileSprite],
-             alpha: 1,
-             duration: gameOptions.tweenSpeed,
-             callbackScope: this,
-             onComplete: function(){
-               console.log("animation DONE!");
-               this.canMove = true;
-             }
-           });
-         }
+        }
+        if(movedSomething) {
+          this.refreshBoard();
+        }
+        else {
+          this.canMove = true;
+        }
+    }
+    //check to see if the tile is going to slide off the board.
+    isLegalPosition(row, col, value) {
+      var rowInside = row >= 0 && row < gameOptions.boardSize.rows;
+      var colInside = col >= 0 && col < gameOptions.boardSize.cols;
+      if(!rowInside || !colInside) {
+        return false;
       }
+      var emptySpot = this.boardArray[row][col].tileValue == 0;
+      var sameValue = this.boardArray[row][col].tileValue == value;
+      return emptySpot || sameValue;
+    }
+
+    refreshBoard(){
+      for(var i = 0; i < gameOptions.boardSize.rows; i++) {
+        for(var j = 0; j < gameOptions.boardSize.cols; j++) {
+          var spritePosition = this.getTilePosition(i, j);            this.boardArray[i][j].tileSprite.x = spritePosition.x;            this.boardArray[i][j].tileSprite.y = spritePosition.y;
+          var tileValue = this.boardArray[i][j].tileValue;
+          if(tileValue > 0) {
+            this.boardArray[i][j].tileSprite.visible = true;                this.boardArray[i][j].tileSprite.setFrame(tileValue - 1);
+          }
+          else {
+            this.boardArray[i][j].tileSprite.visible = false;            }
+          }
+        }
+        this.addTile();
+      }
+    }
+//on a window/screen resize gracefully resize the canvas element.
+function resizeGame(){
+    var canvas = document.querySelector("canvas");
+    var windowWidth = window.innerWidth;
+    var windowHeight = window.innerHeight;
+    var windowRatio = windowWidth / windowHeight;
+    var gameRatio = game.config.width / game.config.height;
+    if(windowRatio < gameRatio){
+        canvas.style.width = windowWidth + "px";
+        canvas.style.height = (windowWidth / gameRatio) + "px";
+    }
+    else{
+        canvas.style.width = (windowHeight * gameRatio) + "px";
+        canvas.style.height = windowHeight + "px";
+    }
 }
