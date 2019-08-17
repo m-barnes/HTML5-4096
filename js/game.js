@@ -68,6 +68,10 @@ class playGame extends Phaser.Scene{
     create(){
       var restartXY = this.getTilePosition(-0.9, gameOptions.boardSize.cols - 1);
       var restartButton = this.add.sprite(restartXY.x, restartXY.y, "restart");
+      restartButton.setInteractive();
+      restartButton.on("pointerdown", function(){
+        this.scene.start("PlayGame");
+      }, this);
       var scoreXY = this.getTilePosition(-0.9, 1);
       this.add.image(scoreXY.x, scoreXY.y, "scorepanel");
       this.add.image(scoreXY.x, scoreXY.y - 70, "scorelabels");
@@ -77,6 +81,10 @@ class playGame extends Phaser.Scene{
       howTo.setOrigin(1, -0.3);
       var logo = this.add.sprite(game.config.width / 2, game.config.height, "logo");
       logo.setOrigin(0.5, 1.2)
+      logo.setInteractive();
+      logo.on("pointerdown", function(){
+        window.location.href = "https://github.com/m-barnes/HTML5-4096"
+      });
         this.canMove = false;
         this.boardArray = [];
         for(var i = 0; i < gameOptions.boardSize.rows; i++){
