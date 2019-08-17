@@ -54,6 +54,7 @@ class bootGame extends Phaser.Scene{
         });
         this.load.audio("move", ["assets/sounds/move.ogg", "assets/sounds/move.mp3"]);
         this.load.audio("grow", ["assets/sounds/grow.ogg", "assets/sounds/grow.mp3"]);
+        this.load.bitmapFont("font", "assets/fonts/font.png", "assets/fonts/font.fnt");
     }
     create(){
         this.scene.start("PlayGame");
@@ -75,6 +76,11 @@ class playGame extends Phaser.Scene{
       var scoreXY = this.getTilePosition(-0.9, 1);
       this.add.image(scoreXY.x, scoreXY.y, "scorepanel");
       this.add.image(scoreXY.x, scoreXY.y - 70, "scorelabels");
+      var textXY = this.getTilePosition(-1.04, -0.4);
+      this.scoreText = this.add.bitmapText(textXY.x, textXY.y, "font", "0");
+      textXY = this.getTilePosition(-1.04, 1.1);
+      this.bestScoreText = this.add.bitmapText(textXY.x, textXY.y, "font", "0");
+
       var gameTitle = this.add.image(10, 5, "gametitle");
       gameTitle.setOrigin(0, -0.2);
       var howTo = this.add.image(game.config.width, 5, "howtoplay");
