@@ -33,7 +33,6 @@ class bootGame extends Phaser.Scene{
             frameHeight: gameOptions.tileSize
         });
     }
-    //creates board. Add sprites to board and hide them.
     create(){
         this.scene.start("PlayGame");
     }
@@ -43,13 +42,45 @@ class playGame extends Phaser.Scene{
     constructor(){
         super("PlayGame");
     }
+    //creates board. Add sprites to board and hide them.
     create(){
+        this.boardArray = [];
         for(var i = 0; i < gameOptions.boardSize.rows; i++){
+            this.boardArray[i] = [];
             for(var j = 0; j < gameOptions.boardSize.cols; j++){
                 var tilePosition = this.getTilePosition(i, j);
                 this.add.image(tilePosition.x, tilePosition.y, "emptytile");
-                this.add.sprite(tilePosition.x, tilePosition.y, "tiles", 0);
+                var tile = this.add.sprite(tilePosition.x, tilePosition.y, "tiles", 0);
+                tile.visible = false;
+                this.boardArray[i][j] = {
+                    tileValue: 0,
+                    tileSprite: tile
+                }
             }
+        }
+        //add two random tiles to the board.
+        this.addTile();
+        this.addTile();
+    }
+    //collect the coordinates for empty tiles on the board.
+    addTile(){
+        var emptyTiles = [];
+        for(var i = 0; i < gameOptions.boardSize.rows; i++){
+            for(var j = 0; j < gameOptions.boardSize.cols; j++){
+                if(this.boardArray[i][j].tileValue == 0){
+                    emptyTiles.push({
+                        row: i,
+                        col: j
+                    })
+                }
+            }
+        }
+        //find a random tile from the emptyTiles array and change the opacity of the element from 0 to 1 to make it 'appear' on the board.
+        if(emptyTiles.length > 0){
+            var chosenTile = Phaser.Utils.Array.GetRandom(emptyTiles);
+            this.boardArray[chosenTile.row][chosenTile.col].tileValue = 1;
+            this.boardArray[chosenTile.row][chosenTile.col].tileSprite.visible = true;
+            this.boardArray[chosenTile.row][chosenTile.col].tileSprite.setFrame(0);
         }
     }
     //find a tile position and return it as a Phaser 'point' object.
