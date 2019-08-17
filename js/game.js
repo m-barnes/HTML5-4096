@@ -179,7 +179,7 @@ class playGame extends Phaser.Scene{
                 if(tileValue != 0){
                     var newRow = curRow;
                     var newCol = curCol;
-                    while(this.isLegalPosition(newRow + dRow, newCol + dCol)){
+                    while(this.isLegalPosition(newRow + dRow, newCol + dCol, tileValue)){
                         newRow += dRow;
                         newCol += dCol;
                     }
@@ -202,10 +202,15 @@ class playGame extends Phaser.Scene{
         this.refreshBoard();
     }
     //check to see if the new position is a 'legal' position for a tile.
-    isLegalPosition(row, col){
+    isLegalPosition(row, col, value) {
         var rowInside = row >= 0 && row < gameOptions.boardSize.rows;
         var colInside = col >= 0 && col < gameOptions.boardSize.cols;
-        return rowInside && colInside;
+        if(!rowInside || !colInside) {
+          return false;
+        }
+        var emptySpot = this.boardArray[row][col].tileValue == 0;
+        var sameValue = this.boardArray[row][col].tileValue == value;
+        return emptySpot || sameValue;
     }
     //refresh the game board. Reset tile positions and reveal tiles based on board status
     refreshBoard() {
