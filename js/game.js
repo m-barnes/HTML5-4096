@@ -42,6 +42,8 @@ class bootGame extends Phaser.Scene{
             frameWidth: gameOptions.tileSize,
             frameHeight: gameOptions.tileSize
         });
+        this.load.audio("move", ["assets/sounds/move.ogg", "assets/sounds/move.mp3"]);
+        this.load.audio("grow", ["assets/sounds/grow.ogg", "assets/sounds/grow.mp3"]);
     }
     create(){
         this.scene.start("PlayGame");
@@ -76,6 +78,9 @@ class playGame extends Phaser.Scene{
         //collect the coordinates for empty tiles on the board.
         this.input.keyboard.on("keydown", this.handleKey, this);
         this.input.on("pointerup", this.handleSwipe, this);
+
+        this.moveSound = this.sound.add("move");
+        this.growSound = this.sound.add("grow");
     }
     //collect the coordinates for empty tiles on the board.
     addTile(){
@@ -204,6 +209,9 @@ class playGame extends Phaser.Scene{
         if(this.movingTiles == 0){
             this.canMove = true;
         }
+        else {
+          this.moveSound.play();
+        }
     }
     //the moveTile method will handle all tile movement, position, and depth.
     moveTile(tile, point, upgrade){
@@ -227,6 +235,7 @@ class playGame extends Phaser.Scene{
         })
     }
     upgradeTile(tile) {
+      this.growSound.play();
       tile.setFrame(tile.frame.name + 1);
       this.tweens.add( {
         targets: [tile],
