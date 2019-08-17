@@ -17,6 +17,7 @@ const LEFT = 0;
 const RIGHT = 1;
 const UP = 2;
 const DOWN = 3;
+
 //load the window, load the canvas (width, height, and background color), and start scenes
 window.onload = function() {
     var gameConfig = {
@@ -71,7 +72,7 @@ class playGame extends Phaser.Scene{
         //add two random tiles to the board.
         this.addTile();
         this.addTile();
-        //check for input from both the keyboard and gestures
+        //collect the coordinates for empty tiles on the board.
         this.input.keyboard.on("keydown", this.handleKey, this);
         this.input.on("pointerup", this.handleSwipe, this);
     }
@@ -171,19 +172,31 @@ class playGame extends Phaser.Scene{
         var firstCol = (d == LEFT) ? 1 : 0;
         var lastCol = gameOptions.boardSize.cols - ((d == RIGHT) ? 1 : 0);
         for(var i = firstRow; i < lastRow; i++){
-            for(var j = firstCol; j <lastCol; j++){
+            for(var j = firstCol; j < lastCol; j++){
                 var curRow = dRow == 1 ? (lastRow - 1) - i : i;
                 var curCol = dCol == 1 ? (lastCol - 1) - j : j;
                 var tileValue = this.boardArray[curRow][curCol].tileValue;
                 if(tileValue != 0){
-                    movedTiles++;
+                    var newRow = curRow;
+                    var newCol = curCol;
+                    while(this.isLegalPosition(newRow + dRow, newCol + dCol)){
+                        newRow += dRow;
+                        newCol += dCol;
+                    }
+                    movedTiles ++;
                     this.boardArray[curRow][curCol].tileSprite.depth = movedTiles;
-                    var newPos = this.getTilePosition(curRow + dRow, curCol + dCol);
+                    var newPos = this.getTilePosition(newRow, newCol);
                     this.boardArray[curRow][curCol].tileSprite.x = newPos.x;
                     this.boardArray[curRow][curCol].tileSprite.y = newPos.y;
                 }
             }
         }
+    }
+    //check to see if the new position is a 'legal' position for a tile.
+    isLegalPosition(row, col){
+        var rowInside = row >= 0 && row < gameOptions.boardSize.rows;
+        var colInside = col >= 0 && col < gameOptions.boardSize.cols;
+        return rowInside && colInside;
     }
 }
 //on a window/screen resize gracefully resize the canvas element.
