@@ -188,6 +188,14 @@ class playGame extends Phaser.Scene{
                     var newPos = this.getTilePosition(newRow, newCol);
                     this.boardArray[curRow][curCol].tileSprite.x = newPos.x;
                     this.boardArray[curRow][curCol].tileSprite.y = newPos.y;
+                    this.boardArray[curRow][curCol].tileValue = 0;
+                    if(this.boardArray[newRow][newCol].tileValue == tileValue) {
+                      this.boardArray[newRow][newCol].tileValue ++;
+                      this.boardArray[curRow] [curCol].tileSprite.setFrame(tileValue);
+                    }
+                    else {
+                      this.boardArray[newRow][newCol].tileValue = tileValue;
+                    }
                 }
             }
         }
