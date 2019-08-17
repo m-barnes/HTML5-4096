@@ -7,7 +7,7 @@ var gameOptions = {
         rows: 4,
         cols: 4
     },
-    tweenSpeed: 2000,
+    tweenSpeed: 200,
     swipeMaxTime: 1000,
     swipeMinDistance: 20,
     swipeMinNormal: 0.85
@@ -162,7 +162,21 @@ class playGame extends Phaser.Scene{
     }
     //move the element according to direction selected.
     makeMove(d){
-        console.log("about to move");
+        var dRow = (d == LEFT || d == RIGHT) ? 0 : d == UP ? -1 : 1;
+        var dCol = (d == UP || d == DOWN) ? 0 : d == LEFT ? -1 : 1;
+        this.canMove = false;
+        for(var i = 0; i < gameOptions.boardSize.rows; i++){
+            for(var j = 0; j < gameOptions.boardSize.cols; j++){
+                var curRow = dRow == 1 ? (gameOptions.boardSize.rows - 1) - i : i;
+                var curCol = dCol == 1 ? (gameOptions.boardSize.cols - 1) - j : j;
+                var tileValue = this.boardArray[curRow][curCol].tileValue;
+                if(tileValue != 0){
+                    var newPos = this.getTilePosition(curRow + dRow, curCol + dCol);
+                    this.boardArray[curRow][curCol].tileSprite.x = newPos.x;
+                    this.boardArray[curRow][curCol].tileSprite.y = newPos.y;
+                }
+            }
+        }
     }
 }
 //on a window/screen resize gracefully resize the canvas element.
