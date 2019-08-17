@@ -199,6 +199,7 @@ class playGame extends Phaser.Scene{
                 }
             }
         }
+        this.refreshBoard();
     }
     //check to see if the new position is a 'legal' position for a tile.
     isLegalPosition(row, col){
@@ -206,7 +207,27 @@ class playGame extends Phaser.Scene{
         var colInside = col >= 0 && col < gameOptions.boardSize.cols;
         return rowInside && colInside;
     }
+    //refresh the game board. Reset tile positions and reveal tiles based on board status
+    refreshBoard() {
+      for(var i = 0; i < gameOptions.boardSize.rows; i++) {
+        for(var j = 0; j < gameOptions.boardSize.cols; j++) {
+          var spritePosition = this.getTilePosition(i, j);
+          this.boardArray[i][j].tileSprite.x = spritePosition.x;
+          this.boardArray[i][j].tileSprite.y = spritePosition.y;
+          var tileValue = this.boardArray[i][j].tileValue;
+          if(tileValue > 0) {
+            this.boardArray[i][j].tileSprite.visible = true;
+            this.boardArray[i][j].tileSprite.setFrame(tileValue - 1);
+          }
+          else {
+            this.boardArray[i][j].tileSprite.visible = false;
+          }
+        }
+      }
+      this.addTile();
+    }
 }
+
 //on a window/screen resize gracefully resize the canvas element.
 function resizeGame(){
     var canvas = document.querySelector("canvas");
