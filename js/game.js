@@ -164,16 +164,17 @@ class playGame extends Phaser.Scene{
     }
     //move the element according to direction selected.
     makeMove(d){
+        this.movingTiles = 0;
         var dRow = (d == LEFT || d == RIGHT) ? 0 : d == UP ? -1 : 1;
         var dCol = (d == UP || d == DOWN) ? 0 : d == LEFT ? -1 : 1;
         this.canMove = false;
-        var movedTiles = 0;
+      //  var movedTiles = 0;
         var firstRow = (d == UP) ? 1 : 0;
         var lastRow = gameOptions.boardSize.rows - ((d == DOWN) ? 1 : 0);
         var firstCol = (d == LEFT) ? 1 : 0;
         var lastCol = gameOptions.boardSize.cols - ((d == RIGHT) ? 1 : 0);
         for(var i = firstRow; i < lastRow; i++){
-          var movedSomething = false;
+      //  var movedSomething = false;
             for(var j = firstCol; j < lastCol; j++){
                 var curRow = dRow == 1 ? (lastRow - 1) - i : i;
                 var curCol = dCol == 1 ? (lastCol - 1) - j : j;
@@ -185,13 +186,14 @@ class playGame extends Phaser.Scene{
                         newRow += dRow;
                         newCol += dCol;
                     }
-                    movedTiles ++;
+                //    movedTiles ++;
                     if(newRow != curRow || newCol != curCol) {
-                      movedSomething = true;
-                      this.boardArray[curRow][curCol].tileSprite.depth = movedTiles;
+                      // movedSomething = true;
+                      // this.boardArray[curRow][curCol].tileSprite.depth = movedTiles;
                       var newPos = this.getTilePosition(newRow, newCol);
-                      this.boardArray[curRow][curCol].tileSprite.x = newPos.x;
-                      this.boardArray[curRow][curCol].tileSprite.y = newPos.y;
+                      // this.boardArray[curRow][curCol].tileSprite.x = newPos.x;
+                      // this.boardArray[curRow][curCol].tileSprite.y = newPos.y;
+                      this.moveTile(this.boardArray[curRow][curCol].tileSprite, newPos);
                       this.boardArray[curRow][curCol].tileValue = 0;
                       if(this.boardArray[newRow][newCol].tileValue == tileValue) {
                         this.boardArray[newRow][newCol].tileValue ++;
@@ -205,12 +207,32 @@ class playGame extends Phaser.Scene{
                 }
             }
         }
-        if(movedSomething) {
-        this.refreshBoard();
-      }
-      else {
-        this.canMove = true;
-      }
+      //   if(movedSomething) {
+      //   this.refreshBoard();
+      // }
+      // else {
+      //   this.canMove = true;
+      // }
+    }
+    //the moveTile method will handle all tile movement, position, and depth.
+    moveTile(tile, point) {
+      this.movingTiles++;
+      tile.depth = this.movingTiles;
+      var distance = Math.abs(tile.x - point.x) + Math.abs(tile.y - point.y);
+      this.tweens.add({
+        targets: [tile],
+        x: point.x,
+        y: point.y,
+        duration: gameOptions.tweenSpeed * distance / gameOptions.tileSize,
+        callbackScope: this,
+        onComplete: function () {
+          this.movingTiles -- ;
+          tile.depth = 0;
+          if(this.movingTiles == 0) {
+            this.refreshBoard();
+          }
+        }
+      })
     }
     //check to see if the new position is a 'legal' position for a tile.
     isLegalPosition(row, col, value) {
