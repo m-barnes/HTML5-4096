@@ -63,8 +63,11 @@ class playGame extends Phaser.Scene{
         //add two random tiles to the board.
         this.addTile();
         this.addTile();
+        //check for input from both the keyboard and gestures
+        this.input.keyboard.on("keydown", this.handleKey, this);
+        this.input.on("pointerup", this.handleSwipe, this);
     }
-//collect the coordinates for empty tiles on the board.
+    //collect the coordinates for empty tiles on the board.
     addTile(){
         var emptyTiles = [];
         for(var i = 0; i < gameOptions.boardSize.rows; i++){
@@ -90,7 +93,6 @@ class playGame extends Phaser.Scene{
                 duration: gameOptions.tweenSpeed,
                 callbackScope: this,
                 onComplete: function(){
-                    console.log("tween completed");
                     this.canMove = true;
                 }
             });
@@ -102,7 +104,20 @@ class playGame extends Phaser.Scene{
         var posY = gameOptions.tileSpacing * (row + 1) + gameOptions.tileSize * (row + 0.5);
         return new Phaser.Geom.Point(posX, posY);
     }
-}
+    //callback function to handle keyboard input.
+    handleKey(e){
+        var keyPressed = e.code
+        console.log("You pressed key #" + keyPressed);
+    }
+    //callback function to handle swipe gestures.
+    handleSwipe(e){
+        var swipeTime = e.upTime - e.downTime;
+        var swipe = new Phaser.Geom.Point(e.upX - e.downX, e.upY - e.downY);
+        console.log("Movement time:" + swipeTime + " ms");
+        console.log("Horizontal distance: " + swipe.x + " pixels");
+        console.log("Vertical distance: " + swipe.y + " pixels");
+    }
+
 //on a window/screen resize gracefully resize the canvas element.
 function resizeGame(){
     var canvas = document.querySelector("canvas");
