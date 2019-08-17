@@ -1,9 +1,19 @@
 var game;
+//Game Options centralized in one section.
+var gameOptions = {
+    tileSize: 200,
+    tileSpacing: 60,
+    boardSize: {
+        rows: 3,
+        cols: 5
+    }
+}
+//load the window, load the canvas (width, height, and background color), and start scenes
 window.onload = function() {
     var gameConfig = {
-        width: 480,
-        height: 640,
-        backgroundColor: 0xff0000,
+        width: gameOptions.boardSize.cols * (gameOptions.tileSize + gameOptions.tileSpacing) + gameOptions.tileSpacing,
+        height: gameOptions.boardSize.rows * (gameOptions.tileSize + gameOptions.tileSpacing) + gameOptions.tileSpacing,
+        backgroundColor: 0xecf0f1,
         scene: [bootGame, playGame]
     }
     game = new Phaser.Game(gameConfig);
@@ -11,22 +21,39 @@ window.onload = function() {
     resizeGame();
     window.addEventListener("resize", resizeGame);
 }
+//start the 'bootgame' scene. Preload images and move to the 'playgame' scene
 class bootGame extends Phaser.Scene{
     constructor(){
         super("BootGame");
+    }
+    preload(){
+        this.load.image("emptytile", "/assets/sprites/emptytile.png");
     }
     create(){
         this.scene.start("PlayGame");
     }
 }
+//start 'playgame' scene. Create the board, load all tiles and hide them.
 class playGame extends Phaser.Scene{
     constructor(){
         super("PlayGame");
     }
     create(){
-        console.log("this is my awesome game");
+        for(var i = 0; i < gameOptions.boardSize.rows; i++){
+            for(var j = 0; j < gameOptions.boardSize.cols; j++){
+                var tilePosition = this.getTilePosition(i, j);
+                this.add.image(tilePosition.x, tilePosition.y, "emptytile");
+            }
+        }
+    }
+    //find a tile's position and return it as a Phaser 'point' object.
+    getTilePosition(row, col){
+        var posX = gameOptions.tileSpacing * (col + 1) + gameOptions.tileSize * (col + 0.5);
+        var posY = gameOptions.tileSpacing * (row + 1) + gameOptions.tileSize * (row + 0.5);
+        return new Phaser.Geom.Point(posX, posY);
     }
 }
+//on a window/screen resize, gracefully resize the canvas element.
 function resizeGame(){
     var canvas = document.querySelector("canvas");
     var windowWidth = window.innerWidth;
