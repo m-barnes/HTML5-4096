@@ -67,6 +67,7 @@ class playGame extends Phaser.Scene{
     }
     //creates board. Add sprites to board and hide them.
     create(){
+      this.score = 0;
       var restartXY = this.getTilePosition(-0.9, gameOptions.boardSize.cols - 1);
       var restartButton = this.add.sprite(restartXY.x, restartXY.y, "restart");
       restartButton.setInteractive();
@@ -236,6 +237,7 @@ class playGame extends Phaser.Scene{
                       this.boardArray[curRow][curCol].tileValue = 0;
                       if(willUpdate) {
                         this.boardArray[newRow][newCol].tileValue ++;
+                        this.score += Math.pow(2, this.boardArray[newRow][newCol].tileValue);
                         this.boardArray[newRow][newCol].upgraded = true;
                         //this.boardArray[curRow] [curCol].tileSprite.setFrame(tileValue);
                       }
@@ -311,6 +313,7 @@ class playGame extends Phaser.Scene{
     }
     //refresh the game board. Reset tile positions and reveal tiles based on board status
     refreshBoard(){
+      this.scoreText.text = this.score.toString();
        for(var i = 0; i < gameOptions.boardSize.rows; i++){
            for(var j = 0; j < gameOptions.boardSize.cols; j++){
                var spritePosition = this.getTilePosition(i, j);
