@@ -9,6 +9,11 @@ var gameOptions = {
     },
     tweenSpeed: 2000
 }
+//constants assigning number values to directions
+const LEFT = 0;
+const RIGHT = 1;
+const UP = 2;
+const DOWN = 3;
 //load the window, load the canvas (width, height, and background color), and start scenes
 window.onload = function() {
     var gameConfig = {
@@ -106,8 +111,26 @@ class playGame extends Phaser.Scene{
     }
     //callback function to handle keyboard input.
     handleKey(e){
-        var keyPressed = e.code
-        console.log("You pressed key #" + keyPressed);
+        if(this.canMove){
+            switch(e.code){
+                case "KeyA":
+                case "ArrowLeft":
+                    this.makeMove(LEFT);
+                    break;
+                case "KeyD":
+                case "ArrowRight":
+                    this.makeMove(RIGHT);
+                    break;
+                case "KeyW":
+                case "ArrowUp":
+                    this.makeMove(UP);
+                    break;
+                case "KeyS":
+                case "ArrowDown":
+                    this.makeMove(DOWN);
+                    break;
+            }
+        }
     }
     //callback function to handle swipe gestures.
     handleSwipe(e){
@@ -116,6 +139,10 @@ class playGame extends Phaser.Scene{
         console.log("Movement time:" + swipeTime + " ms");
         console.log("Horizontal distance: " + swipe.x + " pixels");
         console.log("Vertical distance: " + swipe.y + " pixels");
+    }
+    //move the element according to direction selected.
+    makeMove(d){
+        console.log("about to move");
     }
 }
 //on a window/screen resize gracefully resize the canvas element.
