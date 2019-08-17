@@ -45,6 +45,7 @@ class playGame extends Phaser.Scene{
     }
     //creates board. Add sprites to board and hide them.
     create(){
+        this.canMove = false;
         this.boardArray = [];
         for(var i = 0; i < gameOptions.boardSize.rows; i++){
             this.boardArray[i] = [];
@@ -63,7 +64,7 @@ class playGame extends Phaser.Scene{
         this.addTile();
         this.addTile();
     }
-    //collect the coordinates for empty tiles on the board.
+//collect the coordinates for empty tiles on the board.
     addTile(){
         var emptyTiles = [];
         for(var i = 0; i < gameOptions.boardSize.rows; i++){
@@ -86,7 +87,12 @@ class playGame extends Phaser.Scene{
             this.tweens.add({
                 targets: [this.boardArray[chosenTile.row][chosenTile.col].tileSprite],
                 alpha: 1,
-                duration: gameOptions.tweenSpeed
+                duration: gameOptions.tweenSpeed,
+                callbackScope: this,
+                onComplete: function(){
+                    console.log("tween completed");
+                    this.canMove = true;
+                }
             });
         }
     }
