@@ -117,7 +117,7 @@ class playGame extends Phaser.Scene{
         console.log("Horizontal distance: " + swipe.x + " pixels");
         console.log("Vertical distance: " + swipe.y + " pixels");
     }
-
+}
 //on a window/screen resize gracefully resize the canvas element.
 function resizeGame(){
     var canvas = document.querySelector("canvas");
