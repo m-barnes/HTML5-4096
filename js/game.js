@@ -6,7 +6,8 @@ var gameOptions = {
     boardSize: {
         rows: 4,
         cols: 4
-    }
+    },
+    tweenSpeed: 2000
 }
 //load the window, load the canvas (width, height, and background color), and start scenes
 window.onload = function() {
@@ -81,6 +82,12 @@ class playGame extends Phaser.Scene{
             this.boardArray[chosenTile.row][chosenTile.col].tileValue = 1;
             this.boardArray[chosenTile.row][chosenTile.col].tileSprite.visible = true;
             this.boardArray[chosenTile.row][chosenTile.col].tileSprite.setFrame(0);
+            this.boardArray[chosenTile.row][chosenTile.col].tileSprite.alpha = 0;
+            this.tweens.add({
+                targets: [this.boardArray[chosenTile.row][chosenTile.col].tileSprite],
+                alpha: 1,
+                duration: gameOptions.tweenSpeed
+            });
         }
     }
     //find a tile position and return it as a Phaser 'point' object.
