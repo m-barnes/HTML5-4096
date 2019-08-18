@@ -26,15 +26,18 @@ window.onload = function() {
     var width = gameOptions.boardSize.cols * tileAndSpacing;
     width += gameOptions.tileSpacing;
     var gameConfig = {
+        scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        parent: "thegame",
         width: width,
-        height: width * gameOptions.aspectRatio,
+        height: width * gameOptions.aspectRatio
+      },
         backgroundColor: 0xecf0f1,
         scene: [bootGame, playGame]
     }
     game = new Phaser.Game(gameConfig);
     window.focus();
-    resizeGame();
-    window.addEventListener("resize", resizeGame);
 }
 //start the 'bootgame' scene. Preload the images and move to the 'playgame' scene
 class bootGame extends Phaser.Scene{
@@ -361,19 +364,19 @@ class playGame extends Phaser.Scene{
    }
  }
 
-//on a window/screen resize gracefully resize the canvas element.
-function resizeGame(){
-    var canvas = document.querySelector("canvas");
-    var windowWidth = window.innerWidth;
-    var windowHeight = window.innerHeight;
-    var windowRatio = windowWidth / windowHeight;
-    var gameRatio = game.config.width / game.config.height;
-    if(windowRatio < gameRatio){
-        canvas.style.width = windowWidth + "px";
-        canvas.style.height = (windowWidth / gameRatio) + "px";
-    }
-    else{
-        canvas.style.width = (windowHeight * gameRatio) + "px";
-        canvas.style.height = windowHeight + "px";
-    }
-}
+// //on a window/screen resize gracefully resize the canvas element.
+// function resizeGame(){
+//     var canvas = document.querySelector("canvas");
+//     var windowWidth = window.innerWidth;
+//     var windowHeight = window.innerHeight;
+//     var windowRatio = windowWidth / windowHeight;
+//     var gameRatio = game.config.width / game.config.height;
+//     if(windowRatio < gameRatio){
+//         canvas.style.width = windowWidth + "px";
+//         canvas.style.height = (windowWidth / gameRatio) + "px";
+//     }
+//     else{
+//         canvas.style.width = (windowHeight * gameRatio) + "px";
+//         canvas.style.height = windowHeight + "px";
+//     }
+// }
