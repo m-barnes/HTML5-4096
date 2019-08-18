@@ -4,8 +4,8 @@ var gameOptions = {
     tileSize: 200,
     tileSpacing: 20,
     boardSize: {
-        rows: 5,
-        cols: 5
+        rows: 4,
+        cols: 4
     },
     tweenSpeed: 50,
     swipeMaxTime: 1000,
@@ -29,7 +29,7 @@ window.onload = function() {
         scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        parent: "thegame",
+        parent: "theGameBoard",
         width: width,
         height: width * gameOptions.aspectRatio
       },
@@ -46,6 +46,7 @@ class bootGame extends Phaser.Scene{
     }
     preload(){
         //preload all the pngs for the interface, the emptytile for the game board, and the png for the numbered sprites.
+        this.load.image("fullscreen", "assets/sprites/fullscreen.png");
         this.load.image("restart", "assets/sprites/restart.png");
         this.load.image("scorepanel", "assets/sprites/scorepanel.png");
         this.load.image("scorelabels", "assets/sprites/scorelabels.png");
@@ -104,12 +105,24 @@ class playGame extends Phaser.Scene{
       howTo.setOrigin(1, -0.3);
       //set position and add image for the logo
       var logo = this.add.sprite(game.config.width / 2, game.config.height, "logo");
-      logo.setOrigin(0.5, 1.2)
+      logo.setOrigin(.70, 1.2)
       //make the logo interactive and redirect to the github repository
       logo.setInteractive();
       logo.on("pointerdown", function(){
         window.location.href = "https://github.com/m-barnes/HTML5-4096"
       });
+      //set position and add the image for the fullscreen button
+      var fullScreen = this.getTilePosition(gameOptions.boardSize.rows + 1, gameOptions.boardSize.cols - 1);
+      var fullScreenButton = this.add.sprite(fullScreen.x , fullScreen.y - 120, "fullscreen");
+      fullScreenButton.setInteractive();
+      fullScreenButton.on("pointerup", function() {
+        if(!this.scale.isFullscreen) {
+          this.scale.startFullscreen();
+        }
+        else {
+          this.scale.stopFullscreen();
+        }
+      }, this);
         //prevent the player from moving anything
         this.canMove = false;
         //build a game board.
@@ -363,20 +376,3 @@ class playGame extends Phaser.Scene{
        this.addTile();
    }
  }
-
-// //on a window/screen resize gracefully resize the canvas element.
-// function resizeGame(){
-//     var canvas = document.querySelector("canvas");
-//     var windowWidth = window.innerWidth;
-//     var windowHeight = window.innerHeight;
-//     var windowRatio = windowWidth / windowHeight;
-//     var gameRatio = game.config.width / game.config.height;
-//     if(windowRatio < gameRatio){
-//         canvas.style.width = windowWidth + "px";
-//         canvas.style.height = (windowWidth / gameRatio) + "px";
-//     }
-//     else{
-//         canvas.style.width = (windowHeight * gameRatio) + "px";
-//         canvas.style.height = windowHeight + "px";
-//     }
-// }
