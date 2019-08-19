@@ -106,11 +106,11 @@ class playGame extends Phaser.Scene{
       //set position and add image for the logo
       var logo = this.add.sprite(game.config.width / 2, game.config.height, "logo");
       logo.setOrigin(.70, 1.2)
-      //make the logo interactive and redirect to the github repository
-      logo.setInteractive();
-      logo.on("pointerdown", function(){
-        window.location.href = "https://github.com/m-barnes/HTML5-4096"
-      });
+      //make the logo interactive and redirect to the github repository DISABLED!
+      // logo.setInteractive();
+      // logo.on("pointerdown", function(){
+      //   window.location.href = "https://github.com/m-barnes/HTML5-4096"
+      // });
       //set position and add the image for the fullscreen button
       var fullScreen = this.getTilePosition(gameOptions.boardSize.rows + 1, gameOptions.boardSize.cols - 1);
       var fullScreenButton = this.add.sprite(fullScreen.x , fullScreen.y - 120, "fullscreen");
