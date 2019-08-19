@@ -166,7 +166,7 @@ class playGame extends Phaser.Scene{
         }
         //find a random tile from the emptyTiles array and change the opacity of the element from 0 to 1 to make it 'appear' on the board.
         if(emptyTiles.length > 0){
-            var chosenTile = Phaser.Utils.Array.GetRandom(emptyTiles);
+            var chosenTile = Phaser.Utils.Array.RemoveRandomElement(emptyTiles);
             this.boardArray[chosenTile.row][chosenTile.col].tileValue = 1;
             this.boardArray[chosenTile.row][chosenTile.col].tileSprite.visible = true;
             this.boardArray[chosenTile.row][chosenTile.col].tileSprite.setFrame(0);
