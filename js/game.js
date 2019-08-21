@@ -93,7 +93,7 @@ class playGame extends Phaser.Scene{
       this.scoreText = this.add.bitmapText(textXY.x, textXY.y, "font", "0");
       textXY = this.getTilePosition(-1.04, 1.1);
       //load the best score from local storage
-      this.bestScore - localStorage.getItem(gameOptions.localStorageName);
+      this.bestScore = JSON.parse(localStorage.getItem(gameOptions.localStorageName));
       if(this.bestScore == null){
         this.bestScore = 0;
       }
@@ -354,7 +354,7 @@ class playGame extends Phaser.Scene{
       this.scoreText.text = this.score.toString();
       if(this.score > this.bestScore){
         this.bestScore = this.score;
-        localStorage.setItem(gameOptions.localStorageName, this.bestScore);
+        localStorage.setItem(gameOptions.localStorageName, JSON.stringify(this.bestScore));
         this.bestScoreText.text = this.bestScore.toString();
       }
        for(var i = 0; i < gameOptions.boardSize.rows; i++){
