@@ -14,6 +14,7 @@ var gameOptions = {
     aspectRatio: 16/9,
     localStorageName: "topScore4096"
 }
+
 //constants assigning number values to directions
 const LEFT = 0;
 const RIGHT = 1;
@@ -61,6 +62,7 @@ class bootGame extends Phaser.Scene{
         //load audio files
         this.load.audio("move", ["assets/sounds/move.ogg", "assets/sounds/move.mp3"]);
         this.load.audio("grow", ["assets/sounds/grow.ogg", "assets/sounds/grow.mp3"]);
+        this.load.audio("endgame", ["assets/sounds/endgame.ogg", "assets/sounds/endgame.mp3"]);
         //load font files for score and high score.
         this.load.bitmapFont("font", "assets/fonts/font.png", "assets/fonts/font.fnt");
     }
@@ -106,6 +108,10 @@ class playGame extends Phaser.Scene{
       //set position and add image for the logo
       var logo = this.add.sprite(game.config.width / 2, game.config.height, "logo");
       logo.setOrigin(.70, 1.2)
+      this.gameOverText = this.add.text(game.config.width / 2, game.config.height / 2, 'Game Over', {fontSize: '15em', fill:'#000', backgroundColor:'#fff'});
+      this.gameOverText.setOrigin(.5);
+      this.gameOverText.setDepth(1)
+      this.gameOverText.visible = false;
       //make the logo interactive and redirect to the github repository DISABLED!
       // logo.setInteractive();
       // logo.on("pointerdown", function(){
@@ -150,10 +156,12 @@ class playGame extends Phaser.Scene{
 
         this.moveSound = this.sound.add("move");
         this.growSound = this.sound.add("grow");
+        this.endSound = this.sound.add("endgame");
     }
     //collect the coordinates for empty tiles on the board.
     addTile(){
         var emptyTiles = [];
+
         for(var i = 0; i < gameOptions.boardSize.rows; i++){
             for(var j = 0; j < gameOptions.boardSize.cols; j++){
                 if(this.boardArray[i][j].tileValue == 0){
@@ -164,8 +172,11 @@ class playGame extends Phaser.Scene{
                 }
             }
         }
+        if (emptyTiles.length <= 1) {
+          this.gameOver();
+        }
         //find a random tile from the emptyTiles array and change the opacity of the element from 0 to 1 to make it 'appear' on the board.
-        if(emptyTiles.length > 0){
+        else {
             var chosenTile = Phaser.Utils.Array.RemoveRandomElement(emptyTiles);
             this.boardArray[chosenTile.row][chosenTile.col].tileValue = 1;
             this.boardArray[chosenTile.row][chosenTile.col].tileSprite.visible = true;
@@ -181,6 +192,7 @@ class playGame extends Phaser.Scene{
                 }
             });
         }
+
     }
     //find a tile position and return it as a Phaser 'point' object.
     getTilePosition(row, col){
@@ -375,4 +387,9 @@ class playGame extends Phaser.Scene{
        }
        this.addTile();
    }
+   gameOver() {
+     this.gameOverText.visible = true;
+     this.endSound.play();
+   }
+
  }
